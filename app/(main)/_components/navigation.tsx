@@ -2,9 +2,11 @@ import { cn } from "@/lib/utils";
 import {
   ChevronsLeft,
   MenuIcon,
+  Plus,
   PlusCircle,
   Search,
   Settings,
+  Trash,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
@@ -14,10 +16,20 @@ import { Item } from "./item";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { DocumentList } from "./document-list";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { TrashBox } from "./trash-box";
+import { useSearch } from "@/hooks/use-search";
+import { useSettings } from "@/hooks/use-settings";
 
 export const Navigation = () => {
   const create = useMutation(api.documents.create);
-
+  const search = useSearch();
+  const settings = useSettings();
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isResizingRef = useRef(false);
@@ -140,24 +152,31 @@ export const Navigation = () => {
         </div>
         <div>
           <UserItem />
-          <Item label="Search" icon={Search} isSearched onClick={() => {}} />
+          <Item
+            label="Search"
+            icon={Search}
+            isSearched
+            onClick={search.onOpen}
+          />
+          <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
 
           <Item onClick={handleCreate} label="New Page" icon={PlusCircle} />
         </div>
         <div className="mt-4">
-          {/* <DocumentList />
-            <Item onClick={handleCreate} icon={Plus} label="Add a page" />
-            <Popover>
-              <PopoverTrigger className="w-full mt-4">
-                <Item label="Trash" icon={Trash} />
-              </PopoverTrigger>
-              <PopoverContent
-                side={isMobile ? "bottom" : "right"}
-                className="p-0 w-72"
-              >
-                <TrashBox />
-              </PopoverContent>
-            </Popover> */}
+          <DocumentList />
+          <Item onClick={handleCreate} icon={Plus} label="Add a page" />
+          <Popover>
+            <PopoverTrigger className="w-full mt-4">
+              <Item label="Trash" icon={Trash} />
+            </PopoverTrigger>
+            <PopoverContent
+              side={isMobile ? "bottom" : "right"}
+              className="p-0 w-72"
+            >
+              <TrashBox />
+              {/* <p>Tash Box</p> */}
+            </PopoverContent>
+          </Popover>
         </div>
         {/* To resize the sidebar */}
         <div

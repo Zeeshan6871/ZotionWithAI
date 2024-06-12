@@ -7,6 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 // import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -52,20 +53,20 @@ export const Item = ({
   const { user } = useUser();
   const create = useMutation(api.documents.create);
   const router = useRouter();
-  //   const archive = useMutation(api.documents.archive);
+  const archive = useMutation(api.documents.archive);
 
   // handle archiving a document
-  //   const onArchive = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-  //     event.stopPropagation();
-  //     if (!id) return;
+  const onArchive = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    event.stopPropagation();
+    if (!id) return;
 
-  //     const promise = archive({ id }).then(() => router.push("/documents"));
-  //     toast.promise(promise, {
-  //       loading: "Moving to trash...",
-  //       success: "Note moved to trash!",
-  //       error: "Failed to archive note.",
-  //     });
-  //   };
+    const promise = archive({ id }).then(() => router.push("/documents"));
+    toast.promise(promise, {
+      loading: "Moving to trash...",
+      success: "Note moved to trash!",
+      error: "Failed to archive note.",
+    });
+  };
 
   const handleExpand = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -148,10 +149,10 @@ export const Item = ({
               side="right"
               forceMount
             >
-              {/* <DropdownMenuItem onClick={onArchive}>
+              <DropdownMenuItem onClick={onArchive}>
                 <Trash className="h-4 w-4 mr-2" />
                 Delete
-              </DropdownMenuItem> */}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <div className="text-xs text-muted-foreground p-2">
                 Last edited by: {user?.fullName}
@@ -178,8 +179,8 @@ Item.Skeleton = function ItemSkeleton({ level }: { level?: number }) {
       style={{ paddingLeft: level ? `${level * 12 + 25}px` : "12px" }}
       className="flex gap-x-2 py-[3px]"
     >
-      {/* <Skeleton className="h-4 w-4" />
-      <Skeleton className="h-4 w-[30%]" /> */}
+      <Skeleton className="h-4 w-4" />
+      <Skeleton className="h-4 w-[30%]" />
     </div>
   );
 };
