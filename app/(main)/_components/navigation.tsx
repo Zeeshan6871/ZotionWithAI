@@ -8,7 +8,7 @@ import {
   Settings,
   Trash,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { UserItem } from "./user-item";
@@ -25,12 +25,15 @@ import {
 import { TrashBox } from "./trash-box";
 import { useSearch } from "@/hooks/use-search";
 import { useSettings } from "@/hooks/use-settings";
+import { Navbar } from "./navbar";
 
 export const Navigation = () => {
   const create = useMutation(api.documents.create);
   const search = useSearch();
+  const route = useRouter();
   const settings = useSettings();
   const pathname = usePathname();
+  const params = useParams();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
@@ -119,7 +122,9 @@ export const Navigation = () => {
 
   // handle creating a new document
   const handleCreate = () => {
-    const promise = create({ title: "Untitled" });
+    const promise = create({ title: "Untitled" }).then((documentId) => {
+      route.push(`/documents/${documentId}`);
+    });
     toast.promise(promise, {
       loading: "Creating a new note...",
       success: "New note created!",
@@ -127,7 +132,7 @@ export const Navigation = () => {
     });
   };
 
-  console.log("Render Navigation");
+  // console.log("Render Navigation");
 
   return (
     <>
@@ -194,10 +199,9 @@ export const Navigation = () => {
           isMobile && "left-0 w-full"
         )}
       >
-        {/* {!!params.documentId ? (
-            <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
-          ) : ( */}
-        {
+        {!!params.documentId ? (
+          <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
+        ) : (
           <nav className="bg-transparent px-3 py-2 w-full">
             {/* If the sidebar is collapsed, show the menu icon to let the user reopen the sidebar */}
             {isCollapsed && (
@@ -208,7 +212,7 @@ export const Navigation = () => {
               />
             )}
           </nav>
-        }
+        )}
       </div>
     </>
   );
