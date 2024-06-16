@@ -2,11 +2,13 @@ import { cn } from "@/lib/utils";
 import {
   ChevronsLeft,
   MenuIcon,
+  Plus,
   PlusCircle,
   Search,
   Settings,
+  Trash,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { UserItem } from "./user-item";
@@ -14,11 +16,24 @@ import { Item } from "./item";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { DocumentList } from "./document-list";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { TrashBox } from "./trash-box";
+import { useSearch } from "@/hooks/use-search";
+import { useSettings } from "@/hooks/use-settings";
+import { Navbar } from "./navbar";
 
 export const Navigation = () => {
   const create = useMutation(api.documents.create);
-
+  const search = useSearch();
+  const route = useRouter();
+  const settings = useSettings();
   const pathname = usePathname();
+  const params = useParams();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
@@ -107,7 +122,9 @@ export const Navigation = () => {
 
   // handle creating a new document
   const handleCreate = () => {
-    const promise = create({ title: "Untitled" });
+    const promise = create({ title: "Untitled" }).then((documentId) => {
+      route.push(`/documents/${documentId}`);
+    });
     toast.promise(promise, {
       loading: "Creating a new note...",
       success: "New note created!",
@@ -115,7 +132,7 @@ export const Navigation = () => {
     });
   };
 
-  console.log("Render Navigation");
+  // console.log("Render Navigation");
 
   return (
     <>
@@ -140,24 +157,31 @@ export const Navigation = () => {
         </div>
         <div>
           <UserItem />
-          <Item label="Search" icon={Search} isSearched onClick={() => {}} />
+          <Item
+            label="Search"
+            icon={Search}
+            isSearched
+            onClick={search.onOpen}
+          />
+          <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
 
           <Item onClick={handleCreate} label="New Page" icon={PlusCircle} />
         </div>
         <div className="mt-4">
-          {/* <DocumentList />
-            <Item onClick={handleCreate} icon={Plus} label="Add a page" />
-            <Popover>
-              <PopoverTrigger className="w-full mt-4">
-                <Item label="Trash" icon={Trash} />
-              </PopoverTrigger>
-              <PopoverContent
-                side={isMobile ? "bottom" : "right"}
-                className="p-0 w-72"
-              >
-                <TrashBox />
-              </PopoverContent>
-            </Popover> */}
+          <DocumentList />
+          <Item onClick={handleCreate} icon={Plus} label="Add a page" />
+          <Popover>
+            <PopoverTrigger className="w-full mt-4">
+              <Item label="Trash" icon={Trash} />
+            </PopoverTrigger>
+            <PopoverContent
+              side={isMobile ? "bottom" : "right"}
+              className="p-0 w-72"
+            >
+              <TrashBox />
+              {/* <p>Tash Box</p> */}
+            </PopoverContent>
+          </Popover>
         </div>
         {/* To resize the sidebar */}
         <div
@@ -175,10 +199,9 @@ export const Navigation = () => {
           isMobile && "left-0 w-full"
         )}
       >
-        {/* {!!params.documentId ? (
-            <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
-          ) : ( */}
-        {
+        {!!params.documentId ? (
+          <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
+        ) : (
           <nav className="bg-transparent px-3 py-2 w-full">
             {/* If the sidebar is collapsed, show the menu icon to let the user reopen the sidebar */}
             {isCollapsed && (
@@ -189,7 +212,7 @@ export const Navigation = () => {
               />
             )}
           </nav>
-        }
+        )}
       </div>
     </>
   );
